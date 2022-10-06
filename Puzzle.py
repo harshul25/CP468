@@ -70,7 +70,7 @@ class Puzzle:
         print("Enter puzzle rows: Ex:'1 2 3'")
         print("")
         puzz = []
-        for i in range(0,self.size-1):
+        for i in range(0,self.size):
             row = input().split(" ")
             puzz.append(row)
         return puzz
@@ -115,7 +115,7 @@ class Puzzle:
                     print(current.data[i][j], end =" ")
                 print("\n")
 
-            if self.h(current.data,goal) == 0:
+            if self.h1(current.data,goal) == 0:
                 not_solved = False
                 break
             steps += 1
@@ -127,6 +127,64 @@ class Puzzle:
             self.open.sort(key = attrgetter('f'), reverse=False)
         
 if __name__ == "__main__":
-    puz = Puzzle(4)
+    puz = Puzzle(3)
     puz.process()
     print("Solved \n")
+
+"""
+Start array
+Enter puzzle rows: Ex:'1 2 3'
+
+0 1 3
+4 2 5
+7 8 6
+
+Goal array
+Enter puzzle rows: Ex:'1 2 3'
+
+1 2 3
+4 5 6
+7 8 0
+
+**------------------------------**
+
+0 1 3 
+
+4 2 5 
+
+7 8 6 
+
+**------------------------------**
+
+1 0 3 
+
+4 2 5 
+
+7 8 6 
+
+**------------------------------**
+
+1 2 3 
+
+4 0 5 
+
+7 8 6 
+
+**------------------------------**
+
+1 2 3 
+
+4 5 0 
+
+7 8 6 
+
+**------------------------------**
+
+1 2 3 
+
+4 5 6 
+
+7 8 0 
+
+Solved 
+"""
