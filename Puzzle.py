@@ -95,9 +95,34 @@ class Puzzle:
             dist += abs(puzz_dict_start[key][0] - puzz_dict_goal[key][0]) + abs(puzz_dict_start[key][1] - puzz_dict_goal[key][1])
 
         return dist
+    
+    def h3(self, start, goal):
+        dist = 0
+        mult = 0
+        puzz_dict_start = {}
+        puzz_dict_goal = {}
+        for i in range(0,len(start)):
+            for j in range(0,len(start[i])):
+                puzz_dict_start[start[i][j]] = [i,j]
+                puzz_dict_goal[goal[i][j]] = [i,j]
+        for key in puzz_dict_start.keys():
+            dist += abs(puzz_dict_start[key][0] - puzz_dict_goal[key][0]) + abs(puzz_dict_start[key][1] - puzz_dict_goal[key][1])
+
+        for i in range(0,len(start)):
+            for j in range(0,len(start[i])):
+                if puzz_dict_start[start[i][j]] == puzz_dict_goal[start[(i+1)%self.size][j]] or puzz_dict_goal[start[(i-1)%self.size][j]] or puzz_dict_goal[start[i][(j-1)%self.size] or puzz_dict_goal[i][(j+1)%self.size]]:
+                    mult += 1
+    
+        dist += (mult*2)
+
+        return dist
+    
+    
     #-f(x) = g(x) + h(x)
     def f(self,start, goal):
         return self.h2(start.data,goal) + start.moves
+    
+  
 
     #-process:
             #accept start and goal
