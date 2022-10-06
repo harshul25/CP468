@@ -83,10 +83,21 @@ class Puzzle:
                 if start[i][j] != goal[i][j]:
                     counter += 1
         return counter
+    def h2(self, start, goal):
+        dist = 0
+        puzz_dict_start = {}
+        puzz_dict_goal = {}
+        for i in range(0,len(start)):
+            for j in range(0,len(start[i])):
+                puzz_dict_start[start[i][j]] = [i,j]
+                puzz_dict_goal[goal[i][j]] = [i,j]
+        for key in puzz_dict_start.keys():
+            dist += abs(puzz_dict_start[key][0] - puzz_dict_goal[key][0]) + abs(puzz_dict_start[key][1] - puzz_dict_goal[key][1])
 
+        return dist
     #-f(x) = g(x) + h(x)
     def f(self,start, goal):
-        return self.h1(start.data,goal) + start.moves
+        return self.h2(start.data,goal) + start.moves
 
     #-process:
             #accept start and goal
@@ -115,7 +126,7 @@ class Puzzle:
                     print(current.data[i][j], end =" ")
                 print("\n")
 
-            if self.h1(current.data,goal) == 0:
+            if self.h2(current.data,goal) == 0:
                 not_solved = False
                 break
             steps += 1
