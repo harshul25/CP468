@@ -96,27 +96,49 @@ class Puzzle:
 
         return dist
     
+    #-define h(x) -- X-Y One dimensional evaluation of the N-puzzle
     def h3(self, start, goal):
-        dist = 0
-        mult = 0
-        puzz_dict_start = {}
-        puzz_dict_goal = {}
-        for i in range(0,len(start)):
-            for j in range(0,len(start[i])):
-                puzz_dict_start[start[i][j]] = [i,j]
-                puzz_dict_goal[goal[i][j]] = [i,j]
-        for key in puzz_dict_start.keys():
-            dist += abs(puzz_dict_start[key][0] - puzz_dict_goal[key][0]) + abs(puzz_dict_start[key][1] - puzz_dict_goal[key][1])
+        column_count = 0
+        row_count = 0
+        rows = []
+        columns = []
+        column_temp = zip(*start)
 
-        for i in range(0,len(start)):
-            for j in range(0,len(start[i])):
-                if puzz_dict_start[start[i][j]] == puzz_dict_goal[start[(i+1)%self.size][j]] or puzz_dict_goal[start[(i-1)%self.size][j]] or puzz_dict_goal[start[i][(j-1)%self.size] or puzz_dict_goal[i][(j+1)%self.size]]:
-                    mult += 1
+        for x in column_temp:
+            columns.append(x)
     
-        dist += (mult*2)
+        for row in start: 
+            rows.append(row)
 
-        return dist
-    
+        for i in range(0, len(rows)):
+            for j in range(0, len(rows[i])):
+                if rows[i][j] not in goal[i]:
+                    row_count += 1
+
+        for i in range(0, len(columns)):
+            for j in range(0, len(columns)):
+                if columns[i][j] not in goal[j]:
+                    column_count += 1
+
+        return (row_count + column_count)
+
+    def neighbour_nodes(puzz_dict_start, key):
+        counter = 0
+
+        #-number of neighbours in correspondence with the position of the key
+        dict = {
+            1:2 , 2:3 , 3:2 ,
+            4:3 , 5:4 , 6:3 ,
+            7:2 , 8:3 , 9:2
+        }
+
+        for x in puzz_dict_start.keys():
+            counter += 1
+            if x == key:
+                return dict[counter]
+
+        return
+         
     
     #-f(x) = g(x) + h(x)
     def f(self,start, goal):
