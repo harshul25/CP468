@@ -96,31 +96,56 @@ class Puzzle:
 
         return dist
     
-    #-define h(x) -- X-Y One dimensional evaluation of the N-puzzle
+    #-define h(x) -- Direct Adjacent Reversal Heuristic (Checks if neighbours are direct reversals in terms of goal state coordinates)
     def h3(self, start, goal):
-        column_count = 0
-        row_count = 0
-        rows = []
-        columns = []
-        column_temp = zip(*start)
+        dist = 0
+        mult = 0    # The variable that stores how many direct reversal pairs there are
+        pile = []
+        puzz_dict_start = {}
+        puzz_dict_goal = {}
 
-        for x in column_temp:
-            columns.append(x)
-    
-        for row in start: 
-            rows.append(row)
+        #-Indices which are each a key that refer to a list of neighbour indices
+        indices = {
+            0:[1,3],        1:[0,2,4],
+            2:[1,5],        3:[4,0,6],
+            4:[3,5,1,7],    5:[4,2,8],
+            6:[7,3],        7:[6,8,4],
+            8:[7,5] 
+        }
 
-        for i in range(0, len(rows)):
-            for j in range(0, len(rows[i])):
-                if rows[i][j] not in goal[i]:
-                    row_count += 1
+        for i in range(0,len(start)):
+            for j in range(0,len(start[i])):
+                puzz_dict_start[start[i][j]] = [i,j]
+                puzz_dict_goal[goal[i][j]] = [i,j]
 
-        for i in range(0, len(columns)):
-            for j in range(0, len(columns)):
-                if columns[i][j] not in goal[j]:
-                    column_count += 1
+        #Manhattan Distance (h2)
+        for key in puzz_dict_start.keys():
+            dist += abs(puzz_dict_start[key][0] - puzz_dict_goal[key][0]) + abs(puzz_dict_start[key][1] - puzz_dict_goal[key][1])
 
-        return (row_count + column_count)
+        
+        for num in range(0, len(puzz_dict_start.keys())):         #Iterates through index of keys in a list
+            for key in indices.keys():                            #Iterates through key in indices dictionary
+                if num == key:                                    #-If index of the key in the start matrix is equal to the indice indicated key in the indice dictionary
+                    for neighbour in indices[key]:                #-Then for each neighbour within the (indice) key
+                            if (list(puzz_dict_start.keys())[num]) == (list(puzz_dict_goal.keys())[neighbour]) and (list(puzz_dict_start.keys())[neighbour]) == (list(puzz_dict_goal.keys())[num]):
+                                # Start             Goal
+                                # 1 2 3            1 2 3
+                                # 4 0 5            4 0 5
+                                # 6 7 8            6 8 7
+                                #
+                                #   (1) This if statement is checking if 7 (start state) is equal to its neighbours (8) key (7) in the goal state and vice versa
+                                #   (2) if it is, then it is added to the pile list in order to collect the direct reversal pairs for a final count
+
+                                pile.append(neighbour) 
+
+
+        for value in pile:
+            mult += 1
+        mult = int((mult/2)) #Divided by two because there will always be double the amount of values in the pile list being counted
+        dist += ((mult)*2)
+
+
+        return dist
 
     def neighbour_nodes(puzz_dict_start, key):
         counter = 0
