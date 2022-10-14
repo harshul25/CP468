@@ -4,6 +4,7 @@
 from copy import deepcopy
 from tkinter import N
 from operator import attrgetter
+import random
 
 #initialize a node class
 class Node:
@@ -208,8 +209,47 @@ class Puzzle:
                 self.open.append(option)
             self.done.append(current)
             self.open.sort(key = attrgetter('f'), reverse=False)
+class Solution:
+    def __init__(self,location) -> None:
+        self.location = location
+        pass
+    #generate states - generate hundred states of a given puzzle problem. 
+    #input: n value and number of states
+    def generate_states(self, n):
+        not_solvable = True
+        board = []
+        while not_solvable:
+            open = list(range(0,n))
+            for i in range(0,n):
+                index = random.randint(0,n-i-1)
+                board.append(open.pop(index))
+
+            if self.dp(board,n) != 0:
+                not_solvable = False
+        return board
+
+
+    #check for the dp value 
+    def dp(self,board,n):
+        count = 0
+        for i in range(0,n-1):
+            for j in range(i,n):
+                if board[i] != 0 and board[j] != 0 and board[i] > board[j]:
+                    count += 1
+        return count % 2 == 0
+
+    #check if there are no duplicates within the puzzle. 
+    def check_dup(self,board,i):
+        if len(list(set(board))) != len(board):
+            return -1
+        return i
+     
         
 if __name__ == "__main__":
+    sol = Solution("temp")
+    print(sol.generate_states(9))
+
+
     puz = Puzzle(3)
     puz.process()
     print("Solved \n")
