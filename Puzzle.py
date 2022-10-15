@@ -5,6 +5,7 @@ from copy import deepcopy
 from tkinter import N
 from operator import attrgetter
 import random
+import numpy
 
 #initialize a node class
 class Node:
@@ -36,7 +37,7 @@ class Node:
         #print("find")
         for i in range(0,len(self.data)):
             for j in range(0,len(self.data[i])):
-                if self.data[i][j] == '0':
+                if self.data[i][j] == 0:
                     return i,j
 
     #-copy the puzzle matrix
@@ -147,68 +148,94 @@ class Puzzle:
 
 
         return dist
-
-    def neighbour_nodes(puzz_dict_start, key):
-        counter = 0
-
-        #-number of neighbours in correspondence with the position of the key
-        dict = {
-            1:2 , 2:3 , 3:2 ,
-            4:3 , 5:4 , 6:3 ,
-            7:2 , 8:3 , 9:2
-        }
-
-        for x in puzz_dict_start.keys():
-            counter += 1
-            if x == key:
-                return dict[counter]
-
-        return
          
     
     #-f(x) = g(x) + h(x)
     def f(self,start, goal):
-        return self.h2(start.data,goal) + start.moves
+        return self.h1(start.data,goal) + start.moves
     
+    #-auxillary function to convert 1D to 2D array of
+    #variable size
+    def OnetoTwoD(self, arr):
+        puzzle = []
+        count = 0
+        for row in range(self.size):
+            puzzle_row = []
+            for col in range(self.size):
+                puzzle_row.append(arr[count])
+                count += 1
+            puzzle.append(puzzle_row)
+        return puzzle
   
+    def printMatrix(self,list):
+        print("")
+        for i in range(0,len(list)):
+            for j in range(0,len(list[i])):
+                print(list[i][j], end =" ")
+            print("\n")
+
+    def notvisited(self,node):
+        for mat in self.done:
+            if mat.data == node:
+                return 0
+        return 1
+
+    def getInvCount(self,arr,n):
+        inv_count = 0
+        empty_value = 0
+        length = n*n
+        for i in range(0, length):
+            for j in range(i + 1, length):
+                if arr[j] != empty_value and arr[i] != empty_value and arr[i] > arr[j]:
+                    inv_count += 1
+        return inv_count
+
+	
+    # This function returns true
+    # if given 8 puzzle is solvable.
+    def isSolvable(self,puzzle,n) :
+        # Count inversions in given 8 puzzle
+        inv_count = self.getInvCount([j for sub in puzzle for j in sub],n)
+
+        # return true if inversion count is even.
+        return (inv_count % 2 == 0)
 
     #-process:
             #accept start and goal
             #place start node in an open list 
             #if reached goal node then break
             #sort open list based on f value
-    def process(self):
-        print("Start array")
-        start = self.read()
-        print("")
-        print("Goal array")
-        goal = self.read()
-        print("")
+    def process(self,start):
+        start = self.OnetoTwoD(start)
+        goal = self.OnetoTwoD(list(range(0,(self.size*self.size))))
+        print("Goal Matrix is:")
+        self.printMatrix(goal)
         #Make a node of the start array 
         self.open.append(Node(0,start,0))
         not_solved = True
         steps = 0
         while not_solved:
-            current = self.open[0]
-            self.open = []
+            if len(self.open) != 0:
+                current = self.open.pop(0)
+            else:
+                print("Sorry, tried ",steps," steps could not solve the problem")
+                return 0
             #print the matrix
             print("**------------------------------**")
-            print("")
-            for i in range(0,len(current.data)):
-                for j in range(0,len(current.data[i])):
-                    print(current.data[i][j], end =" ")
-                print("\n")
-
-            if self.h2(current.data,goal) == 0:
+            self.printMatrix(current.data)
+            print("step: ",current.moves)
+            if self.h1(current.data,goal) == 0:
                 not_solved = False
                 break
-            steps += 1
             for option in current.generate_child_nodes():
-                option.moves = steps
+                option.moves = current.moves + 1
                 option.f = self.f(option, goal)
-                self.open.append(option)
+                if self.notvisited(option.data) and self.isSolvable(option.data,n):
+                    self.open.append(option)
             self.done.append(current)
             self.open.sort(key = attrgetter('f'), reverse=False)
+        print("Solved \n")
+        return 1
 class Solution:
     def __init__(self,location) -> None:
         self.location = location
@@ -218,27 +245,54 @@ class Solution:
     def generate_states(self, n):
         not_solvable = True
         board = []
+        num_of_tiles = n*n
         while not_solvable:
-            open = list(range(0,n))
-            for i in range(0,n):
-                index = random.randint(0,n-i-1)
+            open = list(range(0,num_of_tiles))
+            board = []
+            for i in range(0,num_of_tiles):
+                index = random.randint(0,num_of_tiles-i-1)
                 board.append(open.pop(index))
-
-            if self.dp(board,n) != 0:
+            
+            puzzle = self.OnetoTwoD(board,n)
+            if self.isSolvable(puzzle,n):
                 not_solvable = False
         return board
 
-
-    #check for the dp value 
-    def dp(self,board,n):
+        #-auxillary function to convert 1D to 2D array of
+    #variable size
+    def OnetoTwoD(self, arr,n):
+        puzzle = []
         count = 0
-        for i in range(0,n-1):
-            for j in range(i,n):
-                if board[i] != 0 and board[j] != 0 and board[i] > board[j]:
-                    count += 1
-        return count % 2 == 0
+        size = n
+        for row in range(size):
+            puzzle_row = []
+            for col in range(size):
+                puzzle_row.append(arr[count])
+                count += 1
+            puzzle.append(puzzle_row)
+        return puzzle
 
-    #check if there are no duplicates within the puzzle. 
+    def getInvCount(self,arr,n):
+        inv_count = 0
+        empty_value = -1
+        length = n*n
+        for i in range(0, length):
+            for j in range(i + 1, length):
+                if arr[j] != empty_value and arr[i] != empty_value and arr[i] > arr[j]:
+                    inv_count += 1
+        return inv_count
+
+	
+    # This function returns true
+    # if given 8 puzzle is solvable.
+    def isSolvable(self,puzzle,n) :
+        # Count inversions in given 8 puzzle
+        inv_count = self.getInvCount([j for sub in puzzle for j in sub],n)
+
+        # return true if inversion count is even.
+        return (inv_count % 2 == 0)
+
+    #check if there are no duplicates within the puzzle. - not needed
     def check_dup(self,board,i):
         if len(list(set(board))) != len(board):
             return -1
@@ -247,14 +301,27 @@ class Solution:
         
 if __name__ == "__main__":
     sol = Solution("temp")
-    print(sol.generate_states(9))
+    all_sols = []
+    count = 0
+    total_count = 0
+    not_solv = []
+    n = 3
+    while count < 10:
+        to_solve = sol.generate_states(3)
+        print("Will use A* to solve")
+        print(to_solve)
+        puz = Puzzle(n)
+        total_count += 1
+        if puz.process(to_solve) == 1:
+            all_sols.append(to_solve)
+            count += 1
+        else:
+            not_solv.append(to_solve)
+    print("done")
 
-
-    puz = Puzzle(3)
-    puz.process()
-    print("Solved \n")
 
 """
+[1,2,3,4,0,5,8,6,7]
 Start array
 Enter puzzle rows: Ex:'1 2 3'
 
