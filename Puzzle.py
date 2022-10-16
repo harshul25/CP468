@@ -230,7 +230,7 @@ class Puzzle:
             for option in current.generate_child_nodes():
                 option.moves = current.moves + 1
                 option.f = self.f(option, goal)
-                if self.notvisited(option.data) and self.isSolvable(option.data,n):
+                if self.notvisited(option.data) and self.isSolvable(option.data,self.size):
                     self.open.append(option)
             self.done.append(current)
             self.open.sort(key = attrgetter('f'), reverse=False)
@@ -256,6 +256,8 @@ class Solution:
             puzzle = self.OnetoTwoD(board,n)
             if self.isSolvable(puzzle,n):
                 not_solvable = False
+                break
+
         return board
 
         #-auxillary function to convert 1D to 2D array of
@@ -274,7 +276,7 @@ class Solution:
 
     def getInvCount(self,arr,n):
         inv_count = 0
-        empty_value = -1
+        empty_value = 0
         length = n*n
         for i in range(0, length):
             for j in range(i + 1, length):
@@ -305,11 +307,12 @@ if __name__ == "__main__":
     count = 0
     total_count = 0
     not_solv = []
-    n = 3
-    while count < 10:
-        to_solve = sol.generate_states(3)
+    n = 4
+    while count < 5:
+        to_solve = sol.generate_states(n)
         print("Will use A* to solve")
         print(to_solve)
+        
         puz = Puzzle(n)
         total_count += 1
         if puz.process(to_solve) == 1:
@@ -317,6 +320,7 @@ if __name__ == "__main__":
             count += 1
         else:
             not_solv.append(to_solve)
+        
     print("done")
 
 
