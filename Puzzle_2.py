@@ -232,20 +232,24 @@ class Puzzle:
         p_queue = [start]
         closed_dict = dict()
         while len(p_queue):
-            print("**------------------------------**")
+            
             current = p_queue.pop(0)
+            '''
+            print("**------------------------------**")
             self.printMatrix(current.board)
             print("Scores:")
             print("h value: ",current.h)
             print("steps: ",current.moves)
             total = (current.h + current.moves)
             print("combined: ", total)
+            '''
             #to avoid repeats save the current node in a dict
             closed_dict[repr(current.board)] = current 
             #if solved
             if current.h == 0:
-                print(current.prev_moves)
-                print(len(current.prev_moves))
+                #print(current.prev_moves)
+                print("Number of steps: ", len(current.prev_moves)) #number of moves to solve 
+                print("Number of Nodes visited: ",len(closed_dict)) # number of nodes visted
                 return 1
             #check all nodes
             for option in current.generate_child_nodes():
@@ -298,9 +302,9 @@ class Solution:
         else:
             pos = self.findBlankTileBottom(board)
             if (pos & 1):
-                return ~(inversion & 1) and inversion < 15 #the and is a poor attempt to reduce complexity
+                return ~(inversion & 1) 
             else:
-                return inversion & 1 and inversion < 15
+                return inversion & 1 
     #this is to make an initial state for the puzzle
     def generate_states(self):
         not_solvable = True
@@ -314,17 +318,52 @@ class Solution:
                 board.append(open.pop(index))
             
             puzzle = self.OnetoTwoD(board)
-            if self.isSolvable(puzzle):
+            if self.isSolvable(puzzle) and self.h2(puzzle)<10:
                 not_solvable = False
                 break
 
         return board
+    #Manhattan distance
+    def h2(self, node):
+        val = 1
+        dist = 0
+        for i in range(len(node)):
+            for j in range(len(node)):
+                if val == self.size*self.size:
+                    val = 0
+                org_x, org_y = self.find(val,node)
+                dist += abs(j - org_x) + abs(i - org_y)
+                val += 1
+        return dist
+    #auxillary func to find the tile 
+    def find(self, tile, node):
+        for i in range(len(node)):
+            for j in range(len(node)):
+                if node[i][j] == tile:
+                    return j,i
+        print("Can't find tile!")
+    #heuristic 1: all incorrectly places tiles
+    def h1(self,node):
+        goal = list(range(1,(self.size*self.size)))
+        goal.append(0)
+        goal = self.OnetoTwoD(goal)
+        counter = 0
+        for i in range(0,len(node)):
+            for j in range(0,len(node[i])):
+                if node[i][j] != goal[i][j]:
+                    counter += 1
+        return counter
 if __name__ == "__main__":
-    p = Puzzle(4)
-    s = Solution(4)
+    count = 0
+    while count < 100:
+        print("Puzzle #",count)
+        p = Puzzle(3)
+        s = Solution(3)
     #to_solve = [5,1, 2, 3, 9, 7, 11, 4, 13, 6, 15, 8, 14, 10, 0, 12]
-    to_solve = s.generate_states()
-    p.process(to_solve)
+    #to_solve = [3,15,7,11,13,5,0,9,2,4,10,12,6,8,14,1]
+        to_solve = s.generate_states()
+        p.process(to_solve)
+        count += 1
 
 
             
