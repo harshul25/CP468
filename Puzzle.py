@@ -152,7 +152,7 @@ class Puzzle:
     
     #-f(x) = g(x) + h(x)
     def f(self,start, goal):
-        return self.h1(start.data,goal) + start.moves
+        return self.h3(start.data,goal) + start.moves
     
     #-auxillary function to convert 1D to 2D array of
     #variable size
@@ -180,25 +180,52 @@ class Puzzle:
                 return 0
         return 1
 
-    def getInvCount(self,arr,n):
+
+
+    def getInvCount(self,arr):
+        arr1=[]
+        N = self.size
+        for y in arr:
+            for x in y:
+                arr1.append(x)
+        arr=arr1
         inv_count = 0
-        empty_value = 0
-        length = n*n
-        for i in range(0, length):
-            for j in range(i + 1, length):
-                if arr[j] != empty_value and arr[i] != empty_value and arr[i] > arr[j]:
-                    inv_count += 1
+        for i in range(N * N - 1):
+            for j in range(i + 1,N * N):
+                # count pairs(arr[i], arr[j]) such that
+                # i < j and arr[i] > arr[j]
+                if (arr[j] and arr[i] and arr[i] > arr[j]):
+                    inv_count+=1
+            
         return inv_count
 
-	
-    # This function returns true
-    # if given 8 puzzle is solvable.
-    def isSolvable(self,puzzle,n) :
-        # Count inversions in given 8 puzzle
-        inv_count = self.getInvCount([j for sub in puzzle for j in sub],n)
 
-        # return true if inversion count is even.
-        return (inv_count % 2 == 0)
+    # find Position of blank from bottom
+    def findXPosition(self,puzzle):
+        N = self.size
+        # start from bottom-right corner of matrix
+        for i in range(N - 1,-1,-1):
+            for j in range(N - 1,-1,-1):
+                if (puzzle[i][j] == 0):
+                    return N - i
+
+
+    # This function returns true if given
+    # instance of N*N - 1 puzzle is solvable
+    def isSolvable(self,puzzle):
+        # Count inversions in given puzzle
+        invCount = self.getInvCount(puzzle.data)
+        # If grid is odd, return true if inversion
+        # count is even.
+        if (self.size & 1):
+            return ~(invCount & 1)
+
+        else: # grid is even
+            pos = self.findXPosition(puzzle.data)
+            if (pos & 1):
+                return ~(invCount & 1)
+            else:
+                return invCount & 1
 
     #-process:
             #accept start and goal
@@ -224,14 +251,18 @@ class Puzzle:
             print("**------------------------------**")
             self.printMatrix(current.data)
             print("step: ",current.moves)
-            if self.h1(current.data,goal) == 0:
+            if self.h3(current.data,goal) == 0:
                 not_solved = False
                 break
             for option in current.generate_child_nodes():
                 option.moves = current.moves + 1
                 option.f = self.f(option, goal)
-                if self.notvisited(option.data) and self.isSolvable(option.data,self.size):
+                if self.notvisited(option.data) and self.isSolvable(option):
                     self.open.append(option)
+                else:
+                    print(option.data)
+                    print("not visited ",self.notvisited(option.data), " solvable: ",self.isSolvable(option))
+                
             self.done.append(current)
             self.open.sort(key = attrgetter('f'), reverse=False)
         print("Solved \n")
@@ -260,8 +291,7 @@ class Solution:
 
         return board
 
-        #-auxillary function to convert 1D to 2D array of
-    #variable size
+ 
     def OnetoTwoD(self, arr,n):
         puzzle = []
         count = 0
@@ -274,31 +304,50 @@ class Solution:
             puzzle.append(puzzle_row)
         return puzzle
 
-    def getInvCount(self,arr,n):
+    def getInvCount(self,arr,N):
+        arr1=[]
+        for y in arr:
+            for x in y:
+                arr1.append(x)
+        arr=arr1
         inv_count = 0
-        empty_value = 0
-        length = n*n
-        for i in range(0, length):
-            for j in range(i + 1, length):
-                if arr[j] != empty_value and arr[i] != empty_value and arr[i] > arr[j]:
-                    inv_count += 1
+        for i in range(N * N - 1):
+            for j in range(i + 1,N * N):
+                # count pairs(arr[i], arr[j]) such that
+                # i < j and arr[i] > arr[j]
+                if (arr[j] and arr[i] and arr[i] > arr[j]):
+                    inv_count+=1
+            
         return inv_count
 
-	
-    # This function returns true
-    # if given 8 puzzle is solvable.
-    def isSolvable(self,puzzle,n) :
-        # Count inversions in given 8 puzzle
-        inv_count = self.getInvCount([j for sub in puzzle for j in sub],n)
 
-        # return true if inversion count is even.
-        return (inv_count % 2 == 0)
+    # find Position of blank from bottom
+    def findXPosition(self,puzzle,N):
+        # start from bottom-right corner of matrix
+        for i in range(N - 1,-1,-1):
+            for j in range(N - 1,-1,-1):
+                if (puzzle[i][j] == 0):
+                    return N - i
 
-    #check if there are no duplicates within the puzzle. - not needed
-    def check_dup(self,board,i):
-        if len(list(set(board))) != len(board):
-            return -1
-        return i
+
+    # This function returns true if given
+    # instance of N*N - 1 puzzle is solvable
+    def isSolvable(self,puzzle,n):
+        # Count inversions in given puzzle
+        invCount = self.getInvCount(puzzle,n)
+        # If grid is odd, return true if inversion
+        # count is even.
+        if (n%2 == 1):
+            return (invCount%2 == 0)
+
+        else: # grid is even
+            pos = self.findXPosition(puzzle,n)
+            if (pos%2 == 1):
+                return not(invCount%2 == 1)
+            else:
+                return invCount & 1
+
+
      
         
 if __name__ == "__main__":
@@ -307,12 +356,12 @@ if __name__ == "__main__":
     count = 0
     total_count = 0
     not_solv = []
-    n = 4
-    while count < 5:
+    n = 3
+    while count < 10:
         to_solve = sol.generate_states(n)
+        #to_solve = [10,5,13,4,14,6,15,3,8,12,2,1,7,11,9,0]
         print("Will use A* to solve")
         print(to_solve)
-        
         puz = Puzzle(n)
         total_count += 1
         if puz.process(to_solve) == 1:
