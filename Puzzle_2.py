@@ -338,7 +338,7 @@ class Solution:
         goal = list(range(1,(self.size*self.size)))
         goal.append(0)
         board = Node(self.size,goal,None)
-        while moves < random.randint(10,50):
+        while moves < random.randint(10,25):
             temp = board.generate_child_nodes()
             next = temp[random.randint(0,len(temp)-1)]
             board = Node(None,None,next)
