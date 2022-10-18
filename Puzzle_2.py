@@ -332,6 +332,18 @@ class Solution:
                 break
 
         return board
+    #shuffles the board
+    def shuffle(self):
+        moves = 0
+        goal = list(range(1,(self.size*self.size)))
+        goal.append(0)
+        board = Node(self.size,goal,None)
+        while moves < random.randint(10,50):
+            temp = board.generate_child_nodes()
+            next = temp[random.randint(0,len(temp)-1)]
+            board = Node(None,None,next)
+            moves+=1
+        return board.board
     #Manhattan distance
     def h2(self, node):
         val = 1
@@ -364,13 +376,20 @@ class Solution:
         return counter
 if __name__ == "__main__":
     count = 0
+
     while count < 100:
+        to_solve = []
         print("Puzzle #",count)
-        p = Puzzle(3)
-        s = Solution(3)
+        p = Puzzle(4)
+        s = Solution(4)
+        arr2D = s.shuffle()
     #to_solve = [5,1, 2, 3, 9, 7, 11, 4, 13, 6, 15, 8, 14, 10, 0, 12]
     #to_solve = [3,15,7,11,13,5,0,9,2,4,10,12,6,8,14,1]
-        to_solve = s.generate_states()
+        #to_solve = [1, 2, 3, 4, 6, 9, 7, 8, 5, 15, 0, 11, 13, 10, 14, 12]
+        for i in range(len(arr2D)):
+            for j in range(len(arr2D)):
+                to_solve.append(arr2D[i][j])
+        #to_solve = s.generate_states()
         p.process(to_solve)
         count += 1
 
